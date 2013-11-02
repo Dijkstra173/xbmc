@@ -1312,6 +1312,10 @@ namespace VIDEO
       pDlgProgress->Progress();
     }
 
+    bool updateSeasons = false;
+    map<int, int> seasons;
+    m_database.GetTvShowSeasons(showInfo.m_iDbId, seasons);
+
     EPISODELIST episodes;
     bool hasEpisodeGuide = false;
 
@@ -1360,6 +1364,8 @@ namespace VIDEO
         }
         if (AddVideo(&item, CONTENT_TVSHOWS, file->isFolder, true, &showInfo) < 0)
           return INFO_ERROR;
+        if (seasons.find(item.GetVideoInfoTag()->m_iSeason) == seasons.end())
+          updateSeasons = true;
         continue;
       }
 
@@ -1489,6 +1495,8 @@ namespace VIDEO
           
         if (AddVideo(&item, CONTENT_TVSHOWS, file->isFolder, useLocal, &showInfo) < 0)
           return INFO_ERROR;
+        if (seasons.find(item.GetVideoInfoTag()->m_iSeason) == seasons.end())
+          updateSeasons = true;
       }
       else
       {
@@ -1497,7 +1505,25 @@ namespace VIDEO
                   file->cDate.GetAsLocalizedDate().c_str(), file->strTitle.c_str());
       }
     }
+    if (updateSeasons)
+      UpdateSeasons(showInfo, scraper, useLocal);
     return INFO_ADDED;
+  }
+
+  void CVideoInfoScanner::UpdateSeasons(const CVideoInfoTag &showInfo, const ADDON::ScraperPtr &scraper, bool useLocal)
+  {
+    map<int, map<string, string> > seasonArt;
+    m_database.GetTvShowSeasonArt(showInfo.m_iDbId, seasonArt);
+    CVideoInfoTag details;
+    CVideoInfoDownloader loader(scraper);
+    loader.GetArt(showInfo.m_strIMDBNumber, details);
+    details.m_strPath = showInfo.m_strPath;
+    GetSeasonThumbs(details, seasonArt, CVideoThumbLoader::GetArtTypes("season"), useLocal);
+    for (map<int, map<string, string> >::iterator i = seasonArt.begin(); i != seasonArt.end(); ++i)
+    {
+      int seasonID = m_database.AddSeason(showInfo.m_iDbId, i->first);
+      m_database.SetArtForItem(seasonID, "season", i->second);
+    }
   }
 
   CStdString CVideoInfoScanner::GetnfoFile(CFileItem *item, bool bGrabAny) const
@@ -1720,6 +1746,11 @@ namespace VIDEO
     }
     for (int season = -1; season <= maxSeasons; season++)
     {
+      // skip if we already have some art
+      map<int, map<string, string> >::const_iterator i = seasonArt.find(season);
+      if (i != seasonArt.end() && !i->second.empty())
+        continue;
+
       map<string, string> art;
       if (useLocal)
       {
@@ -1773,7 +1804,7 @@ namespace VIDEO
           art.insert(make_pair(artTypes.front(), image));
       }
 
-      seasonArt.insert(make_pair(season, art));
+      seasonArt[season] = art;
     }
   }
 
