@@ -58,8 +58,8 @@ public:
   static int Read(void *h, uint8_t* buf, int size);
   static int64_t Seek(void *h, int64_t pos, int whence);
 
-protected:
   std::string m_filename;
+protected:
   XFILE::CFile *m_pFile;
   bool m_isSeekPosible;
   int m_fileSize;
