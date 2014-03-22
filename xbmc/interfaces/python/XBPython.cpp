@@ -436,6 +436,10 @@ bool XBPython::InitializeEngine()
       }
 #endif
 
+// Lets enable for Pi
+#if defined(TARGET_RASPBERRY_PI)
+   setenv("PYTHONOPTIMIZE", "1", 1);
+#endif
 
 // Darwin packs .pyo files, we need PYTHONOPTIMIZE on in order to load them.
 #if defined(TARGET_DARWIN)
