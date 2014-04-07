@@ -26,7 +26,6 @@
 
 #include "cores/AudioEngine/Utils/AEUtil.h"
 #include "settings/Settings.h"
-#include "PCMRemap.h"
 
 // the size of the audio_render output port buffers
 #define AUDIO_DECODE_OUTPUT_BUFFER (32*1024)
@@ -88,12 +87,11 @@ bool COMXAudioCodecOMX::Open(CDVDStreamInfo &hints)
   m_pCodecContext->block_align = hints.blockalign;
   m_pCodecContext->bit_rate = hints.bitrate;
   m_pCodecContext->bits_per_coded_sample = hints.bitspersample;
-  enum PCMLayout layout = (enum PCMLayout)std::max(0, CSettings::Get().GetInt("audiooutput.channels")-1);
   if (hints.codec == AV_CODEC_ID_TRUEHD)
   {
-    if (layout == PCM_LAYOUT_2_0)
+    if (CSettings::Get().GetInt("audiooutput.channels") == AE_CH_LAYOUT_2_0)
       m_pCodecContext->request_channel_layout = AV_CH_LAYOUT_STEREO;
-    else if (layout <= PCM_LAYOUT_5_1)
+    else if (CSettings::Get().GetInt("audiooutput.channels") == AE_CH_LAYOUT_5_1)
       m_pCodecContext->request_channel_layout = AV_CH_LAYOUT_5POINT1;
   }
   if (m_pCodecContext->request_channel_layout)
@@ -237,7 +235,7 @@ int COMXAudioCodecOMX::GetData(BYTE** dst, double &dts, double &pts)
     /* use unaligned flag to keep output packed */
     uint8_t *out_planes[m_pCodecContext->channels];
     if(av_samples_fill_arrays(out_planes, NULL, m_pBufferOutput + m_iBufferOutputUsed, m_pCodecContext->channels, m_pFrame1->nb_samples, m_desiredSampleFormat, 1) < 0 ||
-       m_dllSwResample.swr_convert(m_pConvert, out_planes, m_pFrame1->nb_samples, (const uint8_t **)m_pFrame1->data, m_pFrame1->nb_samples) < 0)
+       swr_convert(m_pConvert, out_planes, m_pFrame1->nb_samples, (const uint8_t **)m_pFrame1->data, m_pFrame1->nb_samples) < 0)
     {
       CLog::Log(LOGERROR, "COMXAudioCodecOMX::Decode - Unable to convert format %d to %d", (int)m_pCodecContext->sample_fmt, m_desiredSampleFormat);
       outputSize = 0;
@@ -314,7 +312,7 @@ int COMXAudioCodecOMX::GetBitRate()
   return m_pCodecContext->bit_rate;
 }
 
-static unsigned count_bits(int64_t value)
+static unsigned count_bits(uint64_t value)
 {
   unsigned bits = 0;
   for(;value;++bits)
@@ -322,9 +320,10 @@ static unsigned count_bits(int64_t value)
   return bits;
 }
 
-uint64_t COMXAudioCodecOMX::GetChannelMap()
+void COMXAudioCodecOMX::BuildChannelMap()
 {
   uint64_t layout;
+
   int bits = count_bits(m_pCodecContext->channel_layout);
   if (bits == m_pCodecContext->channels)
     layout = m_pCodecContext->channel_layout;
@@ -333,5 +332,31 @@ uint64_t COMXAudioCodecOMX::GetChannelMap()
     CLog::Log(LOGINFO, "COMXAudioCodecOMX::GetChannelMap - FFmpeg reported %d channels, but the layout contains %d ignoring", m_pCodecContext->channels, bits);
     layout = av_get_default_channel_layout(m_pCodecContext->channels);
   }
-  return layout;
+
+  m_channelLayout.Reset();
+
+  if (layout & AV_CH_FRONT_LEFT           ) m_channelLayout += AE_CH_FL  ;
+  if (layout & AV_CH_FRONT_RIGHT          ) m_channelLayout += AE_CH_FR  ;
+  if (layout & AV_CH_FRONT_CENTER         ) m_channelLayout += AE_CH_FC  ;
+  if (layout & AV_CH_LOW_FREQUENCY        ) m_channelLayout += AE_CH_LFE ;
+  if (layout & AV_CH_BACK_LEFT            ) m_channelLayout += AE_CH_BL  ;
+  if (layout & AV_CH_BACK_RIGHT           ) m_channelLayout += AE_CH_BR  ;
+  if (layout & AV_CH_FRONT_LEFT_OF_CENTER ) m_channelLayout += AE_CH_FLOC;
+  if (layout & AV_CH_FRONT_RIGHT_OF_CENTER) m_channelLayout += AE_CH_FROC;
+  if (layout & AV_CH_BACK_CENTER          ) m_channelLayout += AE_CH_BC  ;
+  if (layout & AV_CH_SIDE_LEFT            ) m_channelLayout += AE_CH_SL  ;
+  if (layout & AV_CH_SIDE_RIGHT           ) m_channelLayout += AE_CH_SR  ;
+  if (layout & AV_CH_TOP_CENTER           ) m_channelLayout += AE_CH_TC  ;
+  if (layout & AV_CH_TOP_FRONT_LEFT       ) m_channelLayout += AE_CH_TFL ;
+  if (layout & AV_CH_TOP_FRONT_CENTER     ) m_channelLayout += AE_CH_TFC ;
+  if (layout & AV_CH_TOP_FRONT_RIGHT      ) m_channelLayout += AE_CH_TFR ;
+  if (layout & AV_CH_TOP_BACK_LEFT        ) m_channelLayout += AE_CH_BL  ;
+  if (layout & AV_CH_TOP_BACK_CENTER      ) m_channelLayout += AE_CH_BC  ;
+  if (layout & AV_CH_TOP_BACK_RIGHT       ) m_channelLayout += AE_CH_BR  ;
+}
+
+CAEChannelInfo COMXAudioCodecOMX::GetChannelMap()
+{
+  BuildChannelMap();
+  return m_channelLayout;
 }
