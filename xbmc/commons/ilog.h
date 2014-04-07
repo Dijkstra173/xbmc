@@ -50,6 +50,8 @@
 #define LOGDBUS   (1 << (LOGMASKBIT+5))
 #define LOGJSONRPC   (1 << (LOGMASKBIT+6))
 #define LOGAUDIO  (1 << (LOGMASKBIT+7))
+#define LOGDUMPVIDEO  (1 << (LOGMASKBIT+8))
+#define LOGDUMPAUDIO  (1 << (LOGMASKBIT+9))
 
 #ifdef __GNUC__
 #define ATTRIB_LOG_FORMAT __attribute__((format(printf,3,4)))

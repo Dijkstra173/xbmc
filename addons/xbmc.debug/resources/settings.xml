@@ -8,4 +8,6 @@
   <setting id="bit6" type="bool" label="30005" default="0" />
   <setting id="bit7" type="bool" label="30006" default="0" />
   <setting id="bit8" type="bool" label="30007" default="0" />
+  <setting id="bit9" type="bool" label="30008" default="0" />
+  <setting id="bit10" type="bool" label="30009" default="0" />
 </settings>

@@ -47,3 +47,11 @@ msgstr ""
 msgctxt "#30007"
 msgid "Verbose logging for AUDIO component"
 msgstr ""
+
+msgctxt "#30008"
+msgid "Dump video frames to debug file"
+msgstr ""
+
+msgctxt "#30009"
+msgid "Dump audio frames to debug file"
+msgstr ""
