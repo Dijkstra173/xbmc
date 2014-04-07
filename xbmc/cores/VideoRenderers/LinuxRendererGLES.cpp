@@ -1337,6 +1337,8 @@ void CLinuxRendererGLES::RenderOpenMax(int index, int field)
   GLint filter = m_scalingMethod == VS_SCALINGMETHOD_NEAREST ? GL_NEAREST : GL_LINEAR;
   glTexParameteri(m_textureTarget, GL_TEXTURE_MAG_FILTER, filter);
   glTexParameteri(m_textureTarget, GL_TEXTURE_MIN_FILTER, filter);
+  glTexParameteri(m_textureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(m_textureTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
   g_Windowing.EnableGUIShader(SM_TEXTURE_RGBA);
 
