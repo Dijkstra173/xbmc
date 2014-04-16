@@ -1663,5 +1663,7 @@ int ff_vc1_init_common(VC1Context *v)
     v->pq      = -1;
     v->mvrange = 0; /* 7.1.1.18, p80 */
 
+    ff_vc1dsp_init(&v->vc1dsp);
+
     return 0;
 }

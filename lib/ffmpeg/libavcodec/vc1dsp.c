@@ -30,6 +30,7 @@
 #include "h264chroma.h"
 #include "rnd_avg.h"
 #include "vc1dsp.h"
+#include "startcode.h"
 
 
 /** Apply overlap transform to horizontal edge
@@ -861,8 +862,12 @@ av_cold void ff_vc1dsp_init(VC1DSPContext* dsp) {
     dsp->sprite_v_double_twoscale = sprite_v_double_twoscale_c;
 #endif
 
+    dsp->vc1_find_start_code_candidate = ff_startcode_find_candidate_c;
+
     if (HAVE_ALTIVEC)
         ff_vc1dsp_init_altivec(dsp);
+    if (ARCH_ARM)
+        ff_vc1dsp_init_arm(dsp);
     if (ARCH_X86)
         ff_vc1dsp_init_x86(dsp);
 }

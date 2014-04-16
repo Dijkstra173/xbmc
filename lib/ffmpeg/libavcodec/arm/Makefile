@@ -16,6 +16,9 @@ OBJS-$(CONFIG_FLAC_DECODER)            += arm/flacdsp_init_arm.o        \
 
 OBJS-$(CONFIG_MPEGAUDIODSP)            += arm/mpegaudiodsp_init_arm.o
 ARMV6-OBJS-$(CONFIG_MPEGAUDIODSP)      += arm/mpegaudiodsp_fixed_armv6.o
+ARMV6-OBJS-$(CONFIG_VC1_DECODER)       += arm/startcode_armv6.o
+OBJS-$(CONFIG_VC1_DECODER)             += arm/vc1dsp_init_arm.o
+ARMV6-OBJS-$(CONFIG_VC1_PARSER)        += arm/startcode_armv6.o
 
 OBJS-$(CONFIG_MPEGVIDEO)               += arm/mpegvideo_arm.o
 OBJS-$(CONFIG_VORBIS_DECODER)          += arm/vorbisdsp_init_arm.o

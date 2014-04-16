@@ -73,10 +73,19 @@ typedef struct VC1DSPContext {
     void (*sprite_v_double_twoscale)(uint8_t *dst, const uint8_t *src1a, const uint8_t *src1b, int offset1,
                                                    const uint8_t *src2a, const uint8_t *src2b, int offset2,
                                      int alpha, int width);
+
+    /**
+     * Search buf from the start for up to size bytes. Return the index
+     * of a zero byte, or >= size if not found. Ideally, use lookahead
+     * to filter out any zero bytes that are known to not be followed by
+     * one or more further zero bytes and a one byte.
+     */
+    int (*vc1_find_start_code_candidate)(const uint8_t *buf, int size);
 } VC1DSPContext;
 
 void ff_vc1dsp_init(VC1DSPContext* c);
 void ff_vc1dsp_init_altivec(VC1DSPContext* c);
+void ff_vc1dsp_init_arm(VC1DSPContext* dsp);
 void ff_vc1dsp_init_x86(VC1DSPContext* dsp);
 
 #endif /* AVCODEC_VC1DSP_H */
