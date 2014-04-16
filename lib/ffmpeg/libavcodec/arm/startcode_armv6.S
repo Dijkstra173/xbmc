@@ -2,20 +2,20 @@
  * Copyright (c) 2013 RISC OS Open Ltd
  * Author: Ben Avison <bavison@riscosopen.org>
  *
- * This file is part of Libav.
+ * This file is part of FFmpeg.
  *
- * Libav is free software; you can redistribute it and/or
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
  *
- * Libav is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with Libav; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
@@ -69,8 +69,8 @@ TMP3    .req    lr
         andseq  TMP3, TMP3, PATTERN
 .endm
 
-/* int ff_h264_find_start_code_candidate_armv6(const uint8_t *buf, int size) */
-function ff_h264_find_start_code_candidate_armv6, export=1
+/* int ff_startcode_find_candidate_armv6(const uint8_t *buf, int size) */
+function ff_startcode_find_candidate_armv6, export=1
         push    {v1-v6,lr}
         mov     PTR, BUF
         @ Ensure there are at least (PRELOAD_DISTANCE+2) complete cachelines to go
@@ -236,7 +236,7 @@ function ff_h264_find_start_code_candidate_armv6, export=1
         @ drop through to 98f
 98:     setend  le
 99:     pop     {v1-v6,pc}
-.endfunc
+endfunc
 
         .unreq  RESULT
         .unreq  BUF
