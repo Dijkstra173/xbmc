@@ -2,6 +2,6 @@
 <advancedsettings>
   <video>
     <defaultplayer>omxplayer</defaultplayer>
-    <defaultdvdplayer>omxplayer</defaultdvdplayer>
+    <defaultdvdplayer>dvdplayer</defaultdvdplayer>
   </video>
 </advancedsettings>
