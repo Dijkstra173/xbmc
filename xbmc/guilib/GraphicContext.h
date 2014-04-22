@@ -124,8 +124,8 @@ public:
   {
     return GetResInfo(m_Resolution);
   }
-  const RESOLUTION_INFO GetResInfo(RESOLUTION res) const;
-  void SetResInfo(RESOLUTION res, const RESOLUTION_INFO& info);
+  const RESOLUTION_INFO GetResInfo(RESOLUTION res, bool use_current_3d = true) const;
+  void SetResInfo(RESOLUTION res, const RESOLUTION_INFO& info, bool use_current_3d = true);
 
   /* \brief Get UI scaling information from a given resolution to the screen resolution.
    Takes account of overscan and UI zooming.
