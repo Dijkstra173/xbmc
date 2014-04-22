@@ -707,32 +707,26 @@ void CGraphicContext::ApplyStateBlock()
   g_Windowing.ApplyStateBlock();
 }
 
-const RESOLUTION_INFO CGraphicContext::GetResInfo(RESOLUTION res) const
+const RESOLUTION_INFO CGraphicContext::GetResInfo(RESOLUTION res, bool use_current_3d /*= true*/) const
 {
   RESOLUTION_INFO info = CDisplaySettings::Get().GetResolutionInfo(res);
 
-  if(m_stereoMode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL)
+  if(use_current_3d ? m_stereoMode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL : (info.dwFlags & D3DPRESENTFLAG_MODE3DTB))
   {
-    if((info.dwFlags & D3DPRESENTFLAG_MODE3DTB) == 0)
-    {
-      info.fPixelRatio     /= 2;
-      info.iBlanking        = 0;
-      info.dwFlags         |= D3DPRESENTFLAG_MODE3DTB;
-    }
+    info.fPixelRatio     /= 2;
+    info.iBlanking        = 0;
+    info.dwFlags         |= D3DPRESENTFLAG_MODE3DTB;
     info.iHeight          = (info.iHeight         - info.iBlanking) / 2;
     info.Overscan.top    /= 2;
     info.Overscan.bottom  = (info.Overscan.bottom - info.iBlanking) / 2;
     info.iSubtitles       = (info.iSubtitles      - info.iBlanking) / 2;
   }
 
-  if(m_stereoMode == RENDER_STEREO_MODE_SPLIT_VERTICAL)
+  if(use_current_3d ? m_stereoMode == RENDER_STEREO_MODE_SPLIT_VERTICAL : (info.dwFlags & D3DPRESENTFLAG_MODE3DSBS))
   {
-    if((info.dwFlags & D3DPRESENTFLAG_MODE3DSBS) == 0)
-    {
-      info.fPixelRatio     *= 2;
-      info.iBlanking        = 0;
-      info.dwFlags         |= D3DPRESENTFLAG_MODE3DSBS;
-    }
+    info.fPixelRatio     *= 2;
+    info.iBlanking        = 0;
+    info.dwFlags         |= D3DPRESENTFLAG_MODE3DSBS;
     info.iWidth           = (info.iWidth         - info.iBlanking) / 2;
     info.Overscan.left   /= 2;
     info.Overscan.right   = (info.Overscan.right - info.iBlanking) / 2;
@@ -740,7 +734,7 @@ const RESOLUTION_INFO CGraphicContext::GetResInfo(RESOLUTION res) const
   return info;
 }
 
-void CGraphicContext::SetResInfo(RESOLUTION res, const RESOLUTION_INFO& info)
+void CGraphicContext::SetResInfo(RESOLUTION res, const RESOLUTION_INFO& info, bool use_current_3d /*= true*/)
 {
   RESOLUTION_INFO& curr = CDisplaySettings::Get().GetResolutionInfo(res);
   curr.Overscan   = info.Overscan;
@@ -750,16 +744,14 @@ void CGraphicContext::SetResInfo(RESOLUTION res, const RESOLUTION_INFO& info)
   if(info.dwFlags & D3DPRESENTFLAG_MODE3DSBS)
   {
     curr.Overscan.right  = info.Overscan.right  * 2 + info.iBlanking;
-    if((curr.dwFlags & D3DPRESENTFLAG_MODE3DSBS) == 0)
-      curr.fPixelRatio  /= 2.0;
+    curr.fPixelRatio  /= 2.0;
   }
 
   if(info.dwFlags & D3DPRESENTFLAG_MODE3DTB)
   {
     curr.Overscan.bottom = info.Overscan.bottom * 2 + info.iBlanking;
     curr.iSubtitles      = info.iSubtitles      * 2 + info.iBlanking;
-    if((curr.dwFlags & D3DPRESENTFLAG_MODE3DTB) == 0)
-      curr.fPixelRatio  *= 2.0;
+    curr.fPixelRatio  *= 2.0;
   }
 }
 
