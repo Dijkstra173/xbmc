@@ -2,8 +2,10 @@ include ../../Makefile.include
 include FFMPEG-VERSION
 DEPS= ../../Makefile.include FFMPEG-VERSION Makefile \
       ffmpeg_Speed_up_wtv_index_creation.patch 0001-h264-Move-search-code-search-functions-into-separate.patch \
-      0002-vc-1-Add-platform-specific-start-code-search-routine.patch 0003-vc-1-Optimise-parser-with-special-attention-to-ARM.patch
-
+      0002-vc-1-Add-platform-specific-start-code-search-routine.patch 0003-vc-1-Optimise-parser-with-special-attention-to-ARM.patch    \
+      0001-truehd-tune-VLC-decoding-for-ARM.patch                     0002-truehd-add-hand-scheduled-ARM-asm-version-of-mlp_fil.patch  \
+      0003-truehd-break-out-part-of-rematrix_channels-into-plat.patch 0004-truehd-add-hand-scheduled-ARM-asm-version-of-ff_mlp_.patch  \
+      0005-truehd-break-out-part-of-output_data-into-platform-s.patch 0006-truehd-add-hand-scheduled-ARM-asm-version-of-ff_mlp_.patch
 
 # set to "yes" to enable patching
 # we don't apply patches until we move to a vanilla ffmpeg tarball
@@ -69,6 +71,13 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	cd $(PLATFORM); patch -p1 < ../0001-h264-Move-search-code-search-functions-into-separate.patch
 	cd $(PLATFORM); patch -p1 < ../0002-vc-1-Add-platform-specific-start-code-search-routine.patch
 	cd $(PLATFORM); patch -p1 < ../0003-vc-1-Optimise-parser-with-special-attention-to-ARM.patch
+	cd $(PLATFORM); patch -p1 < ../0001-truehd-tune-VLC-decoding-for-ARM.patch
+	cd $(PLATFORM); patch -p1 < ../0002-truehd-add-hand-scheduled-ARM-asm-version-of-mlp_fil.patch
+	cd $(PLATFORM); patch -p1 < ../0003-truehd-break-out-part-of-rematrix_channels-into-plat.patch
+	cd $(PLATFORM); patch -p1 < ../0004-truehd-add-hand-scheduled-ARM-asm-version-of-ff_mlp_.patch
+	cd $(PLATFORM); patch -p1 < ../0005-truehd-break-out-part-of-output_data-into-platform-s.patch
+	cd $(PLATFORM); patch -p1 < ../0006-truehd-add-hand-scheduled-ARM-asm-version-of-ff_mlp_.patch
+
 	cd $(PLATFORM);\
 	CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" \
 	./configure $(ffmpg_config)
