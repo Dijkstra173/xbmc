@@ -1,6 +1,9 @@
 include ../../Makefile.include
 include FFMPEG-VERSION
-DEPS= ../../Makefile.include FFMPEG-VERSION Makefile ffmpeg_Speed_up_wtv_index_creation.patch
+DEPS= ../../Makefile.include FFMPEG-VERSION Makefile \
+      ffmpeg_Speed_up_wtv_index_creation.patch 0001-h264-Move-search-code-search-functions-into-separate.patch \
+      0002-vc-1-Add-platform-specific-start-code-search-routine.patch 0003-vc-1-Optimise-parser-with-special-attention-to-ARM.patch
+
 
 # set to "yes" to enable patching
 # we don't apply patches until we move to a vanilla ffmpeg tarball
@@ -63,6 +66,9 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
 	cd $(PLATFORM); sed -i".bak" -e "s%pkg_config_default=pkg-config%export PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig\npkg_config_default=$(NATIVEPREFIX)/bin/pkg-config%" configure
 	cd $(PLATFORM); patch -p3 < ../ffmpeg_Speed_up_wtv_index_creation.patch
+	cd $(PLATFORM); patch -p1 < ../0001-h264-Move-search-code-search-functions-into-separate.patch
+	cd $(PLATFORM); patch -p1 < ../0002-vc-1-Add-platform-specific-start-code-search-routine.patch
+	cd $(PLATFORM); patch -p1 < ../0003-vc-1-Optimise-parser-with-special-attention-to-ARM.patch
 	cd $(PLATFORM);\
 	CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" \
 	./configure $(ffmpg_config)
