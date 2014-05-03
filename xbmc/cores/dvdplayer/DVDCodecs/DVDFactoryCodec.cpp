@@ -194,6 +194,10 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
 
   CLog::Log(LOGDEBUG, "CDVDFactoryCodec: compiled in hardware support: %s", hwSupport.c_str());
 
+#if defined(HAVE_LIBOPENMAX)
+  // libopenmax can handle dvd playback including stills
+  if (!CSettings::Get().GetBool("videoplayer.useomx"))
+#endif
   if (hint.stills && (hint.codec == AV_CODEC_ID_MPEG2VIDEO || hint.codec == AV_CODEC_ID_MPEG1VIDEO))
   {
      // If dvd is an mpeg2 and hint.stills
