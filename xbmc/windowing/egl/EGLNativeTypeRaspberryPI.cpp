@@ -58,6 +58,7 @@
 # define DLOG(fmt, args...)
 #endif
 
+static void SetResolutionString(RESOLUTION_INFO &res);
 
 CEGLNativeTypeRaspberryPI::CEGLNativeTypeRaspberryPI()
 {
@@ -194,8 +195,9 @@ int CEGLNativeTypeRaspberryPI::FindMatchingResolution(const RESOLUTION_INFO &res
 #endif
 
 #if defined(TARGET_RASPBERRY_PI)
-int CEGLNativeTypeRaspberryPI::AddUniqueResolution(const RESOLUTION_INFO &res, std::vector<RESOLUTION_INFO> &resolutions)
+int CEGLNativeTypeRaspberryPI::AddUniqueResolution(RESOLUTION_INFO &res, std::vector<RESOLUTION_INFO> &resolutions)
 {
+  SetResolutionString(res);
   int i = FindMatchingResolution(res, resolutions);
   if (i>=0)
   {  // don't replace a progressive resolution with an interlaced one of same resolution
@@ -468,10 +470,7 @@ bool CEGLNativeTypeRaspberryPI::ProbeResolutions(std::vector<RESOLUTION_INFO> &r
       m_desktopRes.fPixelRatio  = get_display_aspect_ratio((SDTV_ASPECT_T)tv_state.display.sdtv.display_options.aspect) / ((float)m_desktopRes.iScreenWidth / (float)m_desktopRes.iScreenHeight);
     }
 
-    m_desktopRes.strMode = StringUtils::Format("%dx%d", m_desktopRes.iScreenWidth, m_desktopRes.iScreenHeight);
-
-    if((int)m_desktopRes.fRefreshRate > 1)
-      SetResolutionString(m_desktopRes);
+    SetResolutionString(m_desktopRes);
 
     m_initDesktopRes = false;
 
@@ -579,8 +578,6 @@ void CEGLNativeTypeRaspberryPI::GetSupportedModes(HDMI_RES_GROUP_T group, std::v
       res.iScreenHeight = tv->height;
       res.fPixelRatio   = get_display_aspect_ratio((HDMI_ASPECT_T)tv->aspect_ratio) / ((float)res.iScreenWidth / (float)res.iScreenHeight);
 
-      SetResolutionString(res);
-
       CLog::Log(LOGDEBUG, "EGL mode %d: %s (%.2f) %s%s:%x\n", i, res.strMode.c_str(), res.fPixelRatio,
           tv->native ? "N" : "", tv->scan_mode ? "I" : "", tv->code);
 
@@ -600,7 +597,6 @@ void CEGLNativeTypeRaspberryPI::GetSupportedModes(HDMI_RES_GROUP_T group, std::v
         RESOLUTION_INFO res2 = res;
         res2.dwFlags |= D3DPRESENTFLAG_MODE3DSBS;
         res2.fPixelRatio    = get_display_aspect_ratio((HDMI_ASPECT_T)tv->aspect_ratio) / ((float)res2.iScreenWidth / (float)res2.iScreenHeight);
-        SetResolutionString(res2);
         CLog::Log(LOGDEBUG, "EGL mode %d: %s (%.2f)\n", i, res2.strMode.c_str(), res2.fPixelRatio);
 
         res2.iSubtitles    = (int)(0.965 * res2.iHeight);
@@ -617,7 +613,6 @@ void CEGLNativeTypeRaspberryPI::GetSupportedModes(HDMI_RES_GROUP_T group, std::v
         RESOLUTION_INFO res2 = res;
         res2.dwFlags |= D3DPRESENTFLAG_MODE3DTB;
         res2.fPixelRatio    = get_display_aspect_ratio((HDMI_ASPECT_T)tv->aspect_ratio) / ((float)res2.iScreenWidth / (float)res2.iScreenHeight);
-        SetResolutionString(res2);
         CLog::Log(LOGDEBUG, "EGL mode %d: %s (%.2f)\n", i, res2.strMode.c_str(), res2.fPixelRatio);
 
         res2.iSubtitles    = (int)(0.965 * res2.iHeight);
